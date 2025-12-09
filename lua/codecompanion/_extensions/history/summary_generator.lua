@@ -1,6 +1,7 @@
 local client = require("codecompanion.http")
 local log = require("codecompanion._extensions.history.log")
 local schema = require("codecompanion.schema")
+local utils require("codecompanion._extensions.history.utils")
 
 local CONSTANTS = {
     STATUS_ERROR = "error",
@@ -139,7 +140,7 @@ function SummaryGenerator:_format_message_for_summary(msg)
             -- Truncate very long tool outputs
             local content = msg.content or ""
             if #content > 500 then
-                content = content:sub(1, 500) .. "... [truncated]"
+                content = utils.truncate_utf8(content, 500) .. "... [truncated]"
             end
             return "Tool Result: " .. content
         end

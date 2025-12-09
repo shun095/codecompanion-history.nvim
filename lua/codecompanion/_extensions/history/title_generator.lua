@@ -2,6 +2,7 @@ local client = require("codecompanion.http")
 local config = require("codecompanion.config")
 local log = require("codecompanion._extensions.history.log")
 local schema = require("codecompanion.schema")
+local utils = require("codecompanion._extensions.history.utils")
 
 local CONSTANTS = {
     STATUS_ERROR = "error",
@@ -134,7 +135,7 @@ function TitleGenerator:generate(chat, callback, is_refresh)
 
             -- Truncate individual message if too long
             if #content > 1000 then
-                content = content:sub(1, 1000) .. " [truncated]"
+                content = utils.truncate_utf8(content, 1000) .. " [truncated]"
             end
 
             table.insert(recent_messages, role_prefix .. ": " .. content)
@@ -160,7 +161,7 @@ function TitleGenerator:generate(chat, callback, is_refresh)
 
         -- Truncate individual message if too long
         if #content > 1000 then
-            content = content:sub(1, 1000) .. " [truncated]"
+            content = utils.truncate_utf8(content, 1000) .. " [truncated]"
         end
 
         conversation_context = "User: " .. content
@@ -168,7 +169,7 @@ function TitleGenerator:generate(chat, callback, is_refresh)
 
     -- Truncate total content if too long
     if #conversation_context > 10000 then
-        conversation_context = conversation_context:sub(1, 10000) .. "\n[conversation truncated]"
+        conversation_context = utils.truncate_utf8(conversation_context, 10000) .. "\n[conversation truncated]"
     end
 
     log:trace(

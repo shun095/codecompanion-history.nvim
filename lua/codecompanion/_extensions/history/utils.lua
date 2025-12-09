@@ -253,4 +253,51 @@ function M.find_project_root(start_path)
     return root or start_path -- fallback to start_path if no root found
 end
 
+
+--- Truncates a UTF-8 encoded string to not exceed the specified number of bytes.
+--
+-- @param str The input UTF-8 string to truncate
+-- @param max_bytes The maximum number of bytes the result should contain
+-- @return A truncated version of the input string that fits within max_bytes
+function M.truncate_utf8(str, max_bytes)
+    if not str or max_bytes <= 0 then
+        return ""
+    end
+
+    local bytes = #str
+    if bytes <= max_bytes then
+        return str
+    end
+
+    local function utf8_char_bytes(pos)
+        local byte = string.byte(str, pos)
+        if not byte then return 0 end
+
+        if byte >= 0xF0 then
+            return 4
+        elseif byte >= 0xE0 then
+            return 3
+        elseif byte >= 0xC0 then
+            return 2
+        else
+            return 1
+        end
+    end
+
+    local current_bytes = 0
+    local i = 1
+
+    while i <= #str do
+        local char_bytes = utf8_char_bytes(i)
+        if current_bytes + char_bytes > max_bytes then
+            break
+        end
+
+        current_bytes = current_bytes + char_bytes
+        i = i + char_bytes
+    end
+
+    return string.sub(str, 1, i - 1)
+end
+
 return M
